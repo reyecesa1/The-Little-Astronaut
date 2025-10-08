@@ -1,0 +1,436 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>The Little Astronaut</title>
+
+  <!-- Retro-but-readable font -->
+  <link href="https://fonts.googleapis.com/css2?family=VT323&display=swap" rel="stylesheet">
+
+  <style>
+    /* ====== SCALE ADJUSTMENT ======
+       Set --scale to 1.25 to enlarge everything 25%.
+       On small screens the scaling is removed in the media query.
+    */
+    :root{
+      --scale: 1.25; /* <-- change to 1 if you want normal size */
+      --bg:#0a0e1a;
+      --accent:#4fc3f7;
+      --accent-dark:#01579b;
+      --muted:#a8b2bf;
+      --glass: rgba(255,255,255,0.03);
+    }
+
+    html,body{
+      height:100%;
+      margin:0;
+      background: linear-gradient(180deg,var(--bg) 0%, #071323 60%);
+      font-family:'VT323', monospace;
+      color:var(--muted);
+      -webkit-font-smoothing:antialiased;
+      -moz-osx-font-smoothing:grayscale;
+      font-size:16px; /* base size increased for better readability */
+    }
+
+    /* scale the whole showcase up by --scale while keeping it centered and fitting the viewport */
+    .wrap{
+      transform: scale(var(--scale));
+      transform-origin: top center;
+      will-change: transform;
+      width: calc(100% / var(--scale));
+      min-height: calc(100vh / var(--scale));
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      gap:36px;
+      padding:48px;
+      box-sizing:border-box;
+      margin:0 auto;
+    }
+
+    /* Toy Box / Product card */
+    .box {
+      width:420px;
+      background: linear-gradient(180deg,#0f1a2a 0%, #0a0e1a 100%);
+      border-radius:18px;
+      padding:28px;
+      box-shadow: 0 18px 40px rgba(2,8,18,0.7), inset 0 1px 0 rgba(255,255,255,0.02);
+      position:relative;
+      border: 3px solid rgba(79,195,247,0.06);
+    }
+
+    .box::before{
+      content:"";
+      position:absolute;
+      inset: -18px -18px auto -18px;
+      height:60px;
+      background: linear-gradient(0deg, rgba(0,0,0,0.35), rgba(0,0,0,0));
+      border-radius:18px 18px 0 0;
+      filter: blur(8px);
+      pointer-events:none;
+    }
+
+    /* Animated badge */
+    .badge {
+      position:absolute;
+      left:6px;
+      top:28px;
+      background:linear-gradient(180deg,var(--accent) 0%, #1e88e5 100%);
+      color:#0b1610;
+      padding:8px 12px;
+      border-radius:6px;
+      box-shadow: 0 12px 24px rgba(0,0,0,0.45);
+      font-size:12px;
+      letter-spacing:1px;
+      z-index:6;
+      transform-origin:center;
+      border:2px solid rgba(0,0,0,0.15);
+      animation: floatBadge 3.8s ease-in-out infinite;
+      transform: rotate(-3deg);
+    }
+
+    @keyframes floatBadge {
+      0% { transform: translateY(0px) rotate(-3deg) scale(1); }
+      50% { transform: translateY(-6px) rotate(-2deg) scale(1.02); }
+      100% { transform: translateY(0px) rotate(-3deg) scale(1); }
+    }
+
+    .toy { display:flex; gap:18px; align-items:flex-start; }
+
+    /* Frame that hosts the original preview (iframe acting as the "video") */
+    .frame {
+      width: 320px;
+      height: 320px;
+      background: #0a0e1a;
+      border-radius: 10px;
+      overflow: hidden;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.6), inset 0 2px 0 rgba(255,255,255,0.02);
+      border: 6px solid rgba(3,8,12,0.6);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      position:relative;
+      z-index:3;
+    }
+
+    .frame iframe {
+      width:320px;
+      height:320px;
+      border:0;
+      display:block;
+      image-rendering: pixelated;
+      image-rendering: crisp-edges;
+      background:#061019;
+    }
+
+    /* Left info */
+    .left-info { width:100%; display:flex; flex-direction:column; gap:12px; }
+
+    /* ===== Title enlarged so the full title occupies more space ===== */
+    h1 {
+      font-size:28px; /* increased */
+      margin:0;
+      color:var(--accent);
+      text-shadow: 2px 2px 0 var(--accent-dark), -1px -1px 0 var(--accent-dark);
+      line-height:1.05;
+      margin-left:6px;
+      letter-spacing:1px;
+      word-spacing:2px;
+      /* ensure it can grow and take space */
+      display:block;
+      max-width:420px;
+    }
+
+    p.lead {
+      margin:6px 0 0 0;
+      font-size:15px; /* increased */
+      color:#cfe0c7;
+      opacity:0.95;
+      max-width:320px; /* allow more width */
+      line-height:1.3;
+    }
+
+    ul.features {
+      margin:10px 0 0 0;
+      padding:0;
+      list-style:none;
+      font-size:13px; /* increased */
+      line-height:1.6;
+      color:var(--muted);
+      display:flex;
+      flex-direction:column;
+      gap:8px;
+    }
+
+    /* Floating bullet cards (still hover) */
+    ul.features li{
+      display:inline-block;
+      padding:8px 10px; /* slightly larger */
+      border-radius:6px;
+      background:var(--glass);
+      border:1px solid rgba(255,255,255,0.02);
+      transition: transform 220ms ease, box-shadow 220ms ease;
+      animation: floatItem 6s ease-in-out infinite;
+      cursor:default;
+      font-size:13px;
+    }
+
+    ul.features li:hover{
+      transform: translateY(-6px) scale(1.03);
+      box-shadow: 0 10px 22px rgba(0,0,0,0.5), 0 0 10px rgba(79,195,247,0.06) inset;
+    }
+
+    @keyframes floatItem {
+      0% { transform: translateY(0px); }
+      50% { transform: translateY(-4px); }
+      100% { transform: translateY(0px); }
+    }
+
+    .meta { margin-top:10px; display:flex; gap:12px; flex-wrap:wrap; align-items:center; }
+
+    /* Primary CTA - add the Download ZIP hover/active visual behavior here too */
+    .btn {
+      display:inline-block;
+      padding:12px 16px;
+      border-radius:10px;
+      text-decoration:none;
+      font-size:14px; /* increased */
+      letter-spacing:0.6px;
+      color:#071014;
+      background:var(--accent);
+      box-shadow: 0 8px 18px rgba(0,0,0,0.45);
+      border: 2px solid var(--accent-dark);
+      cursor:pointer;
+      transition: transform 160ms ease, box-shadow 160ms ease, background 160ms ease;
+    }
+
+    .btn:hover{
+      transform: translateY(-5px);
+      box-shadow: 0 18px 36px rgba(0,0,0,0.6);
+    }
+
+    /* Styled secondary button (used for More and Creator when needed) */
+    .btn.alt {
+      display:inline-flex;
+      gap:8px;
+      align-items:center;
+      padding:10px 12px;
+      border-radius:10px;
+      background:transparent;
+      color:var(--muted);
+      border:2px solid rgba(255,255,255,0.06);
+      cursor:pointer;
+      transition: transform 160ms ease, box-shadow 160ms ease, background 160ms ease;
+      font-size:13px;
+    }
+
+    .btn.alt:hover{
+      transform: translateY(-4px);
+      box-shadow: 0 10px 24px rgba(0,0,0,0.5);
+      background: rgba(255,255,255,0.018);
+    }
+
+    /* Right column: product details */
+    .panel {
+      width:360px;
+      background: linear-gradient(180deg,#0f1b26 0%, #0b1318 100%);
+      padding:22px;
+      border-radius:14px;
+      box-shadow: 0 18px 40px rgba(2,8,18,0.7);
+      border: 1px solid rgba(255,255,255,0.02);
+      font-size:14px; /* increased */
+      line-height:1.45;
+    }
+
+    .panel h2 { margin:0 0 6px 0; font-size:15px; color:var(--accent); text-shadow: 1px 1px 0 var(--accent-dark); }
+    .panel p { margin: 6px 0 12px 0; color:var(--muted); }
+
+    .chip { font-size:12px; padding:6px 8px; border-radius:6px; background: rgba(255,255,255,0.03); color:var(--muted); border:1px solid rgba(255,255,255,0.02); }
+
+    .footer { margin-top:18px; display:flex; gap:8px; align-items:center; }
+    .small { font-size:12px; color:#94a1b2; }
+
+    /* Space section styles */
+    .space-section {
+      margin-top: 20px;
+      padding: 16px;
+      background: rgba(79, 195, 247, 0.05);
+      border-radius: 10px;
+      border: 1px solid rgba(79, 195, 247, 0.1);
+    }
+    
+    .space-section h3 {
+      color: var(--accent);
+      margin-top: 0;
+      font-size: 18px;
+      border-bottom: 1px solid rgba(79, 195, 247, 0.2);
+      padding-bottom: 8px;
+    }
+    
+    .space-section p {
+      font-size: 14px;
+      line-height: 1.5;
+      margin-bottom: 0;
+    }
+
+    /* Modal / instructions box */
+    .modal-backdrop {
+      position:fixed;
+      inset:0;
+      background: rgba(0,0,0,0.6);
+      display:none;
+      align-items:center;
+      justify-content:center;
+      z-index:50;
+      padding:24px;
+    }
+
+    .modal {
+      width: min(720px, 92vw);
+      max-height: 86vh;
+      overflow:auto;
+      background: linear-gradient(180deg,#071323 0%, #071521 100%);
+      border-radius:12px;
+      padding:22px;
+      border:2px solid rgba(79,195,247,0.06);
+      box-shadow: 0 20px 60px rgba(0,0,0,0.7);
+      color:var(--muted);
+      font-size:15px; /* slightly larger */
+      line-height:1.45;
+    }
+
+    .modal h3 { margin:0 0 8px 0; color:var(--accent); font-size:20px; }
+    .modal .close {
+      position:absolute;
+      right:18px;
+      top:18px;
+      background:transparent;
+      border:1px solid rgba(255,255,255,0.06);
+      color:var(--muted);
+      padding:6px 10px;
+      border-radius:8px;
+      cursor:pointer;
+      font-size:13px;
+    }
+
+    @media (max-width:920px){
+      /* Remove scaling on smaller screens for better usability */
+      :root { --scale: 1; }
+      .wrap{
+        transform:none;
+        width:100%;
+        min-height:100vh;
+        flex-direction:column;
+        padding:28px;
+        gap:18px;
+      }
+      .box, .panel { width: min(92vw, 520px); }
+      .panel{width:92vw;}
+      .modal { padding:16px; font-size:14px; }
+      h1 { font-size:22px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <!-- Toy Box with embedded original project (iframe preview acting as video) -->
+    <div class="box" role="region" aria-label="The Little Astronaut toy box">
+      <div class="badge">SPACE EXPLORER EDITION!</div>
+
+      <div class="toy">
+        <div class="frame" aria-hidden="false" role="img" aria-label="Preview">
+          <!-- Live demo embedded (acts like video/preview). If your host blocks iframes, the "Open Demo" CTA opens the site. -->
+          <iframe src="https://the-little-astronaut.vercel.app/" title="The Little Astronaut preview (embedded)"></iframe>
+        </div>
+
+        <div class="left-info">
+          <h1>THE LITTLE ASTRONAUT</h1>
+          <p class="lead">A space exploration game featuring a floating astronaut, planets, and space debris in a pixel-art universe.</p>
+
+          <ul class="features" aria-hidden="false">
+            <li>Random planet generation!</li>
+            <li>Autonomous astronaut movement!</li>
+            <li>Space debris and shooting stars!</li>
+            <li>For space enthusiasts and retro gamers!</li>
+          </ul>
+
+          <div class="meta">
+            <!-- Open Demo now has the download-like behavior in JS (alerts if no link set) -->
+            <a id="openDemo" class="btn" href="https://the-little-astronaut.vercel.app/" target="_blank" rel="noopener">Open Demo</a>
+            <a class="btn alt" href="https://reyecesa1.github.io/CR-About-Me/" target="_blank" rel="noopener">About</a>
+          </div>
+
+        </div>
+      </div>
+
+      <div style="margin-top:18px; font-size:12px; color:rgba(255,255,255,0.18);">
+        <div style="float:left;">by @rmcesar.a</div>
+        <div style="float:right; opacity:0.6;">v1.0</div>
+        <div style="clear:both;"></div>
+      </div>
+    </div>
+
+    <!-- Right panel with product copy and tech / CTA -->
+    <aside class="panel" aria-label="Project details">
+      <h2>The Little Astronaut — Marketing Analysis & Targeted audiences</h2>
+      <p>A space-themed digital pet experience, designed to tap into space exploration fascination. Marketed for sci-fi enthusiasts, retro gamers, and those interested in astronomy. Future development could include a "Tiny Worlds" series, introducing "The Little Diver" or "The Little Farmer". Personalized space missions for users could also be an option, depending on demand. 40% - 75% virality potential in educational and gaming demographics through social media integration & engagement.</p>
+
+      <div style="margin-top:8px; margin-bottom:10px;">
+        <strong style="color:var(--accent); font-size:13px; display:block; margin-bottom:6px;">Tech Skills</strong>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;">
+          <div class="chip">HTML5 Canvas</div>
+          <div class="chip">Vanilla JS</div>
+          <div class="chip">CSS3</div>
+          <div class="chip">Pixel Art</div>
+        </div>
+      </div>
+
+      <!-- Space exploration explanation section -->
+      <div class="space-section">
+        <h3>Space Exploration - Brief History</h3>
+        <p>Space exploration began in the mid-20th century with the launch of Sputnik 1 in 1957. The Space Race between the US and USSR led to significant milestones including the first human in space (Yuri Gagarin, 1961) and the first Moon landing (Apollo 11, 1969). Today, space exploration continues with missions to Mars, the International Space Station, and commercial spaceflight initiatives.</p>
+      </div>
+
+      <div class="footer">
+        <span class="small">© 2025 @rmcesar.a</span>
+      </div>
+    </aside>
+  </div>
+
+  <!-- Modal backdrop (for instructions if needed) -->
+  <div class="modal-backdrop" id="modalBackdrop">
+    <div class="modal">
+      <button class="close" id="closeModal">Close</button>
+      <h3>Instructions</h3>
+      <p>This is a placeholder for any instructions or additional information about The Little Astronaut project.</p>
+    </div>
+  </div>
+
+  <script>
+    // Simple script to handle the modal if needed
+    document.addEventListener('DOMContentLoaded', function() {
+      const instructionsBtn = document.getElementById('instructionsBtn');
+      const modalBackdrop = document.getElementById('modalBackdrop');
+      const closeModal = document.getElementById('closeModal');
+      
+      // If the instructions button exists, set up the modal toggle
+      if (instructionsBtn && modalBackdrop) {
+        instructionsBtn.addEventListener('click', function() {
+          modalBackdrop.style.display = 'flex';
+        });
+        
+        closeModal.addEventListener('click', function() {
+          modalBackdrop.style.display = 'none';
+        });
+        
+        modalBackdrop.addEventListener('click', function(e) {
+          if (e.target === modalBackdrop) {
+            modalBackdrop.style.display = 'none';
+          }
+        });
+      }
+    });
+  </script>
+</body>
+</html>
